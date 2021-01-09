@@ -1,4 +1,5 @@
-LDLIBS = -lm   -lglut -lGL -lGLU -lX11 -lXmu -lXi -L/usr/X11R6/lib
+# note we added -pg
+LDLIBS = -lm   -lglut -lGL -lGLU -lX11 -lXmu -lXi -L/usr/X11R6/lib -pg
 
 showBMP: showBMP.o readBMP.o writeBMP.o
 	gcc -o showBMP readBMP.o writeBMP.o showBMP.o $(LDLIBS)
@@ -10,8 +11,8 @@ writeBMP.o: writeBMP.c writeBMP.h readBMP.h
 	gcc -o writeBMP.o -c writeBMP.c
 
 showBMP.o: showBMP.c myfunction.c
-	gcc -o showBMP.o -c showBMP.c
-
+# note we added -pg
+	gcc -pg -o showBMP.o -c showBMP.c
 clean:
 	rm -f showBMP.o
 	rm -f showBMP
