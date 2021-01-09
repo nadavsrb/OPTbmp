@@ -10,13 +10,13 @@ please specify a kernel option
 Width of gibson_500.bmp: 500
 Height of gibson_500.bmp: 500
 kernel number 1 was chosen
-Total runtime: 132.117000 ms
+Total runtime: 132.478000 ms
 freeglut (./showBMP): failed to open display ''
 *************************./showBMP gibson_500.bmp 2 *************************
 Width of gibson_500.bmp: 500
 Height of gibson_500.bmp: 500
 kernel number 2 was chosen
-Total runtime: 146.005000 ms
+Total runtime: 145.485000 ms
 freeglut (./showBMP): failed to open display ''
 *************************cmp files*************************
 *************************end cmp files*************************

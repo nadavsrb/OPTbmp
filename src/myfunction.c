@@ -44,9 +44,9 @@ void initialize_pixel_sum(pixel_sum *sum) {
 static void assign_sum_to_pixel(pixel *current_pixel, pixel_sum sum, int kernelScale) {
 
     // divide by kernel's weight
-    sum.red = sum.red / kernelScale;
-    sum.green = sum.green / kernelScale;
-    sum.blue = sum.blue / kernelScale;
+    sum.red /= kernelScale;
+    sum.green /= kernelScale;
+    sum.blue /= kernelScale;
 
     // truncate each pixel's color values to match the range [0,255]
     current_pixel->red = (unsigned char) (min(max(sum.red, 0), 255));
@@ -77,72 +77,75 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
     pixel current_pixel;
     int min_intensity = 766; // arbitrary value that is higher than maximum possible intensity, which is 255*3=765
     int max_intensity = -1; // arbitrary value that is lower than minimum possible intensity, which is 0
-    int min_row, min_col, max_row, max_col;
+    int min_index, max_index;// more efficient
     pixel loop_pixel;
 
-	// we that this pixel is in the range of change (in the "red square as defined in ex5")
-	int halfKernelSize = kernelSize >> 1; //=kernelSize/2
-	if( i < halfKernelSize ||
-		i >= dim - halfKernelSize ||
-		j < halfKernelSize ||
-		j >= dim - halfKernelSize){
-			printf("%d, %d\n", i, j);
-			return *src;
-	}
+	//this pixel is in the range of change - func smooth takes care of that
+	//so, we don't need min or max
 
     initialize_pixel_sum(&sum);
 
 	//calculating lengths:
+	int halfKernelSize = kernelSize >> 1; //=kernelSize/2
 	int length1 = i + halfKernelSize;
 	int length2 = j + halfKernelSize;
+
 	//Optimize by calculate index efficiently in loop:
 	int kIndex = 0;
 	ii = i - halfKernelSize;
 	int indexPixel = ii * dim;
+
+	//best to check here and calculate to filter in his loop for minimize the memory we read.
+	if(!filter){
+		for(; ii <= length1; ++ii) {
+			jj = j - halfKernelSize;
+			for(; jj <= length2; ++jj) {
+				// apply kernel on pixel at [ii,jj]
+				sum_pixels_by_weight(&sum, src[indexPixel + jj], *((int *)kernel +kIndex));
+				++kIndex;
+			}
+			indexPixel += dim;
+		}
+
+		// assign kernel's result to pixel at [i,j]
+		assign_sum_to_pixel(&current_pixel, sum, kernelScale);
+		return current_pixel;
+	}
+
     for(; ii <= length1; ++ii) {
 		jj = j - halfKernelSize;
-		int kCol = 0;
         for(; jj <= length2; ++jj) {
-            // apply kernel on pixel at [ii,jj]
-            sum_pixels_by_weight(&sum, src[indexPixel + jj], *((int *)kernel +kIndex + kCol));
-			++kCol;
-        }
-		kIndex += kernelSize;
-		indexPixel += dim;
-    }
+			// check if smaller than min or higher than max and update
+			int finalIndex = indexPixel + jj;
+            loop_pixel = src[finalIndex];
 
-    if (filter) {
-        //Optimize by calculate index efficiently in loop:
-		int kIndex = 0;
-		ii = i - halfKernelSize;
-		int indexPixel = ii * dim;
-        for(; ii <= length1; ++ii) {
-			jj = j - halfKernelSize;
-            for(; jj <= length2; ++jj) {
-                // check if smaller than min or higher than max and update
-                loop_pixel = src[indexPixel + jj];
-				
-				//calculating once this arg:
-				int loop_pixel_intensity = ((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue);
+			// apply kernel on pixel at [ii,jj]
+			sum_pixels_by_weight(&sum, src[finalIndex], *((int *)kernel +kIndex));
+			++kIndex;
+			
+			//calculating once this arg:
+			int loop_pixel_intensity = ((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue);
 
-                if (loop_pixel_intensity <= min_intensity) {
-                    min_intensity = loop_pixel_intensity;
-                    min_row = ii;
-                    min_col = jj;
-                }
+            if (loop_pixel_intensity <= min_intensity) {
+                min_intensity = loop_pixel_intensity;
 
-                if (loop_pixel_intensity > max_intensity) {
-                    max_intensity = loop_pixel_intensity;
-                    max_row = ii;
-                    max_col = jj;
-                }
+				//more efficient to remember the loc:
+                min_index = finalIndex;
             }
-			indexPixel += dim;
-        }
-        // filter out min and max
-        sum_pixels_by_weight(&sum, src[calcIndex(min_row, min_col, dim)], -1);
-        sum_pixels_by_weight(&sum, src[calcIndex(max_row, max_col, dim)], -1);
-    }
+
+            if (loop_pixel_intensity > max_intensity) {
+                max_intensity = loop_pixel_intensity;
+
+				//more efficient to remember the loc:
+                max_index = finalIndex;
+            }
+		}
+		indexPixel += dim;
+	}
+
+    // filter out min and max
+    sum_pixels_by_weight(&sum, src[min_index], -1);
+    sum_pixels_by_weight(&sum, src[max_index], -1);
 
     // assign kernel's result to pixel at [i,j]
     assign_sum_to_pixel(&current_pixel, sum, kernelScale);
@@ -172,14 +175,20 @@ void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSi
 }
 
 void charsToPixels(Image *charsImg, pixel* pixels) {
-
-    int row, col;
+//calculating index efficiently
+    int row = 0;
+	int index = 0;
+	int indexMult3 = 0;
     for (row = 0 ; row < m ; ++row) {
-        for (col = 0 ; col < n ; ++col) {
+		int col = 0;
+        for (; col < n ; ++col) {
 
-            pixels[row*n + col].red = image->data[3*row*n + 3*col];
-            pixels[row*n + col].green = image->data[3*row*n + 3*col + 1];
-            pixels[row*n + col].blue = image->data[3*row*n + 3*col + 2];
+            pixels[index].red = image->data[indexMult3];
+            pixels[index].green = image->data[indexMult3 + 1];
+            pixels[index].blue = image->data[indexMult3 + 2];
+
+			++index;
+			indexMult3 += 3;
         }
     }
 }
@@ -188,17 +197,18 @@ void pixelsToChars(pixel* pixels, Image *charsImg) {
 	//calculating index efficiently
     int row = 0;
 	int index = 0;
+	int indexMult3 = 0;
     for (row = 0 ; row < m ; ++row) {
-        for (int col = 0 ; col < n ; ++col) {
-			//calculating the mults once:
-			int finalIndex = index + col;
-			int finalIndexMult3 = 3*finalIndex;
+		int col = 0;
+        for (; col < n ; ++col) {
 
-            image->data[finalIndexMult3] = pixels[finalIndex].red;
-            image->data[finalIndexMult3 + 1] = pixels[finalIndex].green;
-            image->data[finalIndexMult3 + 2] = pixels[finalIndex].blue;
+            image->data[indexMult3] = pixels[index].red;
+            image->data[indexMult3 + 1] = pixels[index].green;
+            image->data[indexMult3 + 2] = pixels[index].blue;
+
+			++index;
+			indexMult3 += 3;
         }
-		index += n;
     }
 }
 
@@ -207,16 +217,15 @@ void copyPixels(pixel* src, pixel* dst) {
     int row = 0;
 	int index = 0;
     for (row = 0 ; row < m ; ++row) {
-        for (int col = 0 ; col < n ; ++col) {
-			//calculating the mults once:
-			int finalIndex = index + col;
+		int col = 0;
+        for (; col < n ; ++col) {
 
-            dst[finalIndex].red = src[finalIndex].red;
-            dst[finalIndex].green = src[finalIndex].green;
-            dst[finalIndex].blue = src[finalIndex].blue;
+            dst[index].red = src[index].red;
+            dst[index].green = src[index].green;
+            dst[index].blue = src[index].blue;
+
+			++index;
         }
-
-		index += n;
     }
 }
 
