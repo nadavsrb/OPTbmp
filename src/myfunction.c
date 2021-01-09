@@ -157,10 +157,17 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
 
     int i, j;
-    for (i = kernelSize / 2 ; i < dim - kernelSize / 2; ++i) {
-        for (j =  kernelSize / 2 ; j < dim - kernelSize / 2 ; ++j) {
-            dst[calcIndex(i, j, dim)] = applyKernel(dim, i, j, src, kernelSize, kernel, kernelScale, filter);
+	//removing calculations from loop:
+	int halfKernelSize = kernelSize << 1;
+	int length = dim - halfKernelSize;
+	//calculating index efficiently
+	int dstIndex = halfKernelSize * dim;
+    for (i = halfKernelSize ; i < length; ++i) {
+        for (j =  halfKernelSize ; j < length; ++j) {
+            dst[dstIndex + j] = applyKernel(dim, i, j, src, kernelSize, kernel, kernelScale, filter);
         }
+
+		dstIndex += dim;
     }
 }
 
@@ -178,35 +185,46 @@ void charsToPixels(Image *charsImg, pixel* pixels) {
 }
 
 void pixelsToChars(pixel* pixels, Image *charsImg) {
-
-    int row, col;
+	//calculating index efficiently
+    int row = 0;
+	int index = 0;
     for (row = 0 ; row < m ; ++row) {
-        for (col = 0 ; col < n ; ++col) {
+        for (int col = 0 ; col < n ; ++col) {
+			//calculating the mults once:
+			int finalIndex = index + col;
+			int finalIndexMult3 = 3*finalIndex;
 
-            image->data[3*row*n + 3*col] = pixels[row*n + col].red;
-            image->data[3*row*n + 3*col + 1] = pixels[row*n + col].green;
-            image->data[3*row*n + 3*col + 2] = pixels[row*n + col].blue;
+            image->data[finalIndexMult3] = pixels[finalIndex].red;
+            image->data[finalIndexMult3 + 1] = pixels[finalIndex].green;
+            image->data[finalIndexMult3 + 2] = pixels[finalIndex].blue;
         }
+		index += n;
     }
 }
 
 void copyPixels(pixel* src, pixel* dst) {
-
-    int row, col;
+	//calculating index efficiently
+    int row = 0;
+	int index = 0;
     for (row = 0 ; row < m ; ++row) {
-        for (col = 0 ; col < n ; ++col) {
+        for (int col = 0 ; col < n ; ++col) {
+			//calculating the mults once:
+			int finalIndex = index + col;
 
-            dst[row*n + col].red = src[row*n + col].red;
-            dst[row*n + col].green = src[row*n + col].green;
-            dst[row*n + col].blue = src[row*n + col].blue;
+            dst[finalIndex].red = src[finalIndex].red;
+            dst[finalIndex].green = src[finalIndex].green;
+            dst[finalIndex].blue = src[finalIndex].blue;
         }
+
+		index += n;
     }
 }
 
 void doConvolution(Image *image, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
-
-    pixel* pixelsImg = malloc(m*n*sizeof(pixel));
-    pixel* backupOrg = malloc(m*n*sizeof(pixel));
+	//caculating length once:
+	size_t size = m*n*sizeof(pixel);
+    pixel* pixelsImg = malloc(size);
+    pixel* backupOrg = malloc(size);
 
     charsToPixels(image, pixelsImg);
     copyPixels(pixelsImg, backupOrg);
