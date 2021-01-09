@@ -1,0 +1,26 @@
+gcc -pg -o showBMP.o -c showBMP.c
+gcc -o readBMP.o -c readBMP.c
+gcc -o writeBMP.o -c writeBMP.c
+gcc -o showBMP readBMP.o writeBMP.o showBMP.o -lm   -lglut -lGL -lGLU -lX11 -lXmu -lXi -L/usr/X11R6/lib -pg
+*************************./showBMP gibson_500.bmp *************************
+Width of gibson_500.bmp: 500
+Height of gibson_500.bmp: 500
+please specify a kernel option
+*************************./showBMP gibson_500.bmp 1 *************************
+Width of gibson_500.bmp: 500
+Height of gibson_500.bmp: 500
+kernel number 1 was chosen
+Total runtime: 175.326000 ms
+freeglut (./showBMP): failed to open display ''
+*************************./showBMP gibson_500.bmp 2 *************************
+Width of gibson_500.bmp: 500
+Height of gibson_500.bmp: 500
+kernel number 2 was chosen
+Total runtime: 268.188000 ms
+freeglut (./showBMP): failed to open display ''
+*************************cmp files*************************
+*************************end cmp files*************************
+rm -f showBMP.o
+rm -f showBMP
+rm -f readBMP.o
+rm -f writeBMP.o
