@@ -3,39 +3,21 @@ Flat profile:
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
  time   seconds   seconds    calls  ms/call  ms/call  name    
-<<<<<<< HEAD
- 50.08      0.07     0.07   496008     0.00     0.00  applyKernel
- 21.46      0.10     0.03 13392216     0.00     0.00  min
- 17.89      0.13     0.03  4960080     0.00     0.00  sum_pixels_by_weight
-  7.15      0.14     0.01        2     5.01    70.11  smooth
-  3.58      0.14     0.01   496008     0.00     0.00  assign_sum_to_pixel
-  0.00      0.14     0.00  7688124     0.00     0.00  calcIndex
-  0.00      0.14     0.00  4464072     0.00     0.00  max
-  0.00      0.14     0.00   496008     0.00     0.00  initialize_pixel_sum
-  0.00      0.14     0.00        2     0.00     0.00  charsToPixels
-  0.00      0.14     0.00        2     0.00     0.00  copyPixels
-  0.00      0.14     0.00        2     0.00    70.11  doConvolution
-  0.00      0.14     0.00        2     0.00     0.00  pixelsToChars
-  0.00      0.14     0.00        1     0.00     0.00  getImage
-  0.00      0.14     0.00        1     0.00   140.23  myfunction
-  0.00      0.14     0.00        1     0.00   140.23  optimize
-=======
- 57.24      0.04     0.04   496008     0.00     0.00  applyKernel
- 28.62      0.06     0.02 13392216     0.00     0.00  min
- 14.31      0.07     0.01        2     5.01     5.01  charsToPixels
-  0.00      0.07     0.00  7688124     0.00     0.00  calcIndex
-  0.00      0.07     0.00  4960080     0.00     0.00  sum_pixels_by_weight
-  0.00      0.07     0.00  4464072     0.00     0.00  max
-  0.00      0.07     0.00   496008     0.00     0.00  assign_sum_to_pixel
-  0.00      0.07     0.00   496008     0.00     0.00  initialize_pixel_sum
-  0.00      0.07     0.00        2     0.00     0.00  copyPixels
-  0.00      0.07     0.00        2     0.00    35.06  doConvolution
-  0.00      0.07     0.00        2     0.00     0.00  pixelsToChars
-  0.00      0.07     0.00        2     0.00    30.05  smooth
-  0.00      0.07     0.00        1     0.00     0.00  getImage
-  0.00      0.07     0.00        1     0.00    70.11  myfunction
-  0.00      0.07     0.00        1     0.00    70.11  optimize
->>>>>>> 2bd5664683f8b4a9798a3b49c90b216db99b51bb
+ 25.04      0.02     0.02 13392216     0.00     0.00  min
+ 25.04      0.04     0.02   496008     0.00     0.00  applyKernel
+ 12.52      0.05     0.01  4960080     0.00     0.00  sum_pixels_by_weight
+ 12.52      0.06     0.01   496008     0.00     0.00  assign_sum_to_pixel
+ 12.52      0.07     0.01        2     5.01     5.01  charsToPixels
+  6.26      0.08     0.01  7688124     0.00     0.00  calcIndex
+  6.26      0.08     0.01  4464072     0.00     0.00  max
+  0.00      0.08     0.00   496008     0.00     0.00  initialize_pixel_sum
+  0.00      0.08     0.00        2     0.00     0.00  copyPixels
+  0.00      0.08     0.00        2     0.00    40.07  doConvolution
+  0.00      0.08     0.00        2     0.00     0.00  pixelsToChars
+  0.00      0.08     0.00        2     0.00    35.06  smooth
+  0.00      0.08     0.00        1     0.00     0.00  getImage
+  0.00      0.08     0.00        1     0.00    80.13  myfunction
+  0.00      0.08     0.00        1     0.00    80.13  optimize
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -73,133 +55,68 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-<<<<<<< HEAD
-granularity: each sample hit covers 2 byte(s) for 7.13% of 0.14 seconds
+granularity: each sample hit covers 2 byte(s) for 12.48% of 0.08 seconds
 
 index % time    self  children    called     name
-                0.00    0.14       2/2           myfunction [3]
-[1]    100.0    0.00    0.14       2         doConvolution [1]
-                0.01    0.13       2/2           smooth [2]
-                0.00    0.00       2/2           charsToPixels [13]
+                0.00    0.08       2/2           myfunction [2]
+[1]    100.0    0.00    0.08       2         doConvolution [1]
+                0.00    0.07       2/2           smooth [5]
+                0.01    0.00       2/2           charsToPixels [10]
                 0.00    0.00       2/2           copyPixels [14]
                 0.00    0.00       2/2           pixelsToChars [15]
 -----------------------------------------------
-                0.01    0.13       2/2           doConvolution [1]
-[2]    100.0    0.01    0.13       2         smooth [2]
-                0.07    0.06  496008/496008      applyKernel [6]
-                0.00    0.00  496008/7688124     calcIndex [10]
+                0.00    0.08       1/1           optimize [3]
+[2]    100.0    0.00    0.08       1         myfunction [2]
+                0.00    0.08       2/2           doConvolution [1]
 -----------------------------------------------
-                0.00    0.14       1/1           optimize [4]
-[3]    100.0    0.00    0.14       1         myfunction [3]
-                0.00    0.14       2/2           doConvolution [1]
------------------------------------------------
-                0.00    0.14       1/1           main [5]
-[4]    100.0    0.00    0.14       1         optimize [4]
-                0.00    0.14       1/1           myfunction [3]
+                0.00    0.08       1/1           main [4]
+[3]    100.0    0.00    0.08       1         optimize [3]
+                0.00    0.08       1/1           myfunction [2]
 -----------------------------------------------
                                                  <spontaneous>
-[5]    100.0    0.00    0.14                 main [5]
-                0.00    0.14       1/1           optimize [4]
+[4]    100.0    0.00    0.08                 main [4]
+                0.00    0.08       1/1           optimize [3]
                 0.00    0.00       1/1           getImage [16]
 -----------------------------------------------
-                0.07    0.06  496008/496008      smooth [2]
-[6]     92.9    0.07    0.06  496008         applyKernel [6]
-                0.03    0.00 11904192/13392216     min [7]
-                0.03    0.00 4960080/4960080     sum_pixels_by_weight [8]
-                0.01    0.00  496008/496008      assign_sum_to_pixel [9]
-                0.00    0.00 7192116/7688124     calcIndex [10]
-                0.00    0.00 2976048/4464072     max [11]
-                0.00    0.00  496008/496008      initialize_pixel_sum [12]
------------------------------------------------
-                0.00    0.00 1488024/13392216     assign_sum_to_pixel [9]
-                0.03    0.00 11904192/13392216     applyKernel [6]
-[7]     21.4    0.03    0.00 13392216         min [7]
------------------------------------------------
-                0.03    0.00 4960080/4960080     applyKernel [6]
-[8]     17.9    0.03    0.00 4960080         sum_pixels_by_weight [8]
------------------------------------------------
-                0.01    0.00  496008/496008      applyKernel [6]
-[9]      6.0    0.01    0.00  496008         assign_sum_to_pixel [9]
-                0.00    0.00 1488024/13392216     min [7]
-                0.00    0.00 1488024/4464072     max [11]
------------------------------------------------
-                0.00    0.00  496008/7688124     smooth [2]
-                0.00    0.00 7192116/7688124     applyKernel [6]
-[10]     0.0    0.00    0.00 7688124         calcIndex [10]
------------------------------------------------
-                0.00    0.00 1488024/4464072     assign_sum_to_pixel [9]
-                0.00    0.00 2976048/4464072     applyKernel [6]
-[11]     0.0    0.00    0.00 4464072         max [11]
------------------------------------------------
-                0.00    0.00  496008/496008      applyKernel [6]
-[12]     0.0    0.00    0.00  496008         initialize_pixel_sum [12]
------------------------------------------------
-                0.00    0.00       2/2           doConvolution [1]
-[13]     0.0    0.00    0.00       2         charsToPixels [13]
-=======
-granularity: each sample hit covers 2 byte(s) for 14.26% of 0.07 seconds
-
-index % time    self  children    called     name
-                0.00    0.07       2/2           myfunction [2]
-[1]    100.0    0.00    0.07       2         doConvolution [1]
-                0.00    0.06       2/2           smooth [6]
-                0.01    0.00       2/2           charsToPixels [8]
-                0.00    0.00       2/2           copyPixels [14]
-                0.00    0.00       2/2           pixelsToChars [15]
------------------------------------------------
-                0.00    0.07       1/1           optimize [3]
-[2]    100.0    0.00    0.07       1         myfunction [2]
                 0.00    0.07       2/2           doConvolution [1]
+[5]     87.5    0.00    0.07       2         smooth [5]
+                0.02    0.05  496008/496008      applyKernel [6]
+                0.00    0.00  496008/7688124     calcIndex [11]
 -----------------------------------------------
-                0.00    0.07       1/1           main [4]
-[3]    100.0    0.00    0.07       1         optimize [3]
-                0.00    0.07       1/1           myfunction [2]
------------------------------------------------
-                                                 <spontaneous>
-[4]    100.0    0.00    0.07                 main [4]
-                0.00    0.07       1/1           optimize [3]
-                0.00    0.00       1/1           getImage [16]
------------------------------------------------
-                0.04    0.02  496008/496008      smooth [6]
-[5]     85.7    0.04    0.02  496008         applyKernel [5]
+                0.02    0.05  496008/496008      smooth [5]
+[6]     87.1    0.02    0.05  496008         applyKernel [6]
                 0.02    0.00 11904192/13392216     min [7]
-                0.00    0.00  496008/496008      assign_sum_to_pixel [9]
-                0.00    0.00 7192116/7688124     calcIndex [10]
-                0.00    0.00 4960080/4960080     sum_pixels_by_weight [11]
+                0.01    0.00  496008/496008      assign_sum_to_pixel [8]
+                0.01    0.00 4960080/4960080     sum_pixels_by_weight [9]
+                0.00    0.00 7192116/7688124     calcIndex [11]
                 0.00    0.00 2976048/4464072     max [12]
                 0.00    0.00  496008/496008      initialize_pixel_sum [13]
 -----------------------------------------------
-                0.00    0.06       2/2           doConvolution [1]
-[6]     85.7    0.00    0.06       2         smooth [6]
-                0.04    0.02  496008/496008      applyKernel [5]
-                0.00    0.00  496008/7688124     calcIndex [10]
+                0.00    0.00 1488024/13392216     assign_sum_to_pixel [8]
+                0.02    0.00 11904192/13392216     applyKernel [6]
+[7]     25.0    0.02    0.00 13392216         min [7]
 -----------------------------------------------
-                0.00    0.00 1488024/13392216     assign_sum_to_pixel [9]
-                0.02    0.00 11904192/13392216     applyKernel [5]
-[7]     28.6    0.02    0.00 13392216         min [7]
------------------------------------------------
-                0.01    0.00       2/2           doConvolution [1]
-[8]     14.3    0.01    0.00       2         charsToPixels [8]
------------------------------------------------
-                0.00    0.00  496008/496008      applyKernel [5]
-[9]      3.2    0.00    0.00  496008         assign_sum_to_pixel [9]
+                0.01    0.00  496008/496008      applyKernel [6]
+[8]     17.4    0.01    0.00  496008         assign_sum_to_pixel [8]
                 0.00    0.00 1488024/13392216     min [7]
                 0.00    0.00 1488024/4464072     max [12]
 -----------------------------------------------
-                0.00    0.00  496008/7688124     smooth [6]
-                0.00    0.00 7192116/7688124     applyKernel [5]
-[10]     0.0    0.00    0.00 7688124         calcIndex [10]
+                0.01    0.00 4960080/4960080     applyKernel [6]
+[9]     12.5    0.01    0.00 4960080         sum_pixels_by_weight [9]
 -----------------------------------------------
-                0.00    0.00 4960080/4960080     applyKernel [5]
-[11]     0.0    0.00    0.00 4960080         sum_pixels_by_weight [11]
+                0.01    0.00       2/2           doConvolution [1]
+[10]    12.5    0.01    0.00       2         charsToPixels [10]
 -----------------------------------------------
-                0.00    0.00 1488024/4464072     assign_sum_to_pixel [9]
-                0.00    0.00 2976048/4464072     applyKernel [5]
-[12]     0.0    0.00    0.00 4464072         max [12]
+                0.00    0.00  496008/7688124     smooth [5]
+                0.00    0.00 7192116/7688124     applyKernel [6]
+[11]     6.2    0.01    0.00 7688124         calcIndex [11]
 -----------------------------------------------
-                0.00    0.00  496008/496008      applyKernel [5]
+                0.00    0.00 1488024/4464072     assign_sum_to_pixel [8]
+                0.00    0.00 2976048/4464072     applyKernel [6]
+[12]     6.2    0.01    0.00 4464072         max [12]
+-----------------------------------------------
+                0.00    0.00  496008/496008      applyKernel [6]
 [13]     0.0    0.00    0.00  496008         initialize_pixel_sum [13]
->>>>>>> 2bd5664683f8b4a9798a3b49c90b216db99b51bb
 -----------------------------------------------
                 0.00    0.00       2/2           doConvolution [1]
 [14]     0.0    0.00    0.00       2         copyPixels [14]
@@ -207,11 +124,7 @@ index % time    self  children    called     name
                 0.00    0.00       2/2           doConvolution [1]
 [15]     0.0    0.00    0.00       2         pixelsToChars [15]
 -----------------------------------------------
-<<<<<<< HEAD
-                0.00    0.00       1/1           main [5]
-=======
                 0.00    0.00       1/1           main [4]
->>>>>>> 2bd5664683f8b4a9798a3b49c90b216db99b51bb
 [16]     0.0    0.00    0.00       1         getImage [16]
 -----------------------------------------------
 
@@ -305,16 +218,8 @@ notice and this notice are preserved.
 
 Index by function name
 
-<<<<<<< HEAD
-   [6] applyKernel             [1] doConvolution           [3] myfunction
-   [9] assign_sum_to_pixel    [16] getImage                [4] optimize
-  [10] calcIndex              [12] initialize_pixel_sum   [15] pixelsToChars
-  [13] charsToPixels          [11] max                     [2] smooth
-  [14] copyPixels              [7] min                     [8] sum_pixels_by_weight
-=======
-   [5] applyKernel             [1] doConvolution           [2] myfunction
-   [9] assign_sum_to_pixel    [16] getImage                [3] optimize
-  [10] calcIndex              [13] initialize_pixel_sum   [15] pixelsToChars
-   [8] charsToPixels          [12] max                     [6] smooth
-  [14] copyPixels              [7] min                    [11] sum_pixels_by_weight
->>>>>>> 2bd5664683f8b4a9798a3b49c90b216db99b51bb
+   [6] applyKernel             [1] doConvolution           [2] myfunction
+   [8] assign_sum_to_pixel    [16] getImage                [3] optimize
+  [11] calcIndex              [13] initialize_pixel_sum   [15] pixelsToChars
+  [10] charsToPixels          [12] max                     [5] smooth
+  [14] copyPixels              [7] min                     [9] sum_pixels_by_weight
