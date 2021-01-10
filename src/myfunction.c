@@ -42,16 +42,21 @@ void initialize_pixel_sum(pixel_sum *sum) {
  * assign_sum_to_pixel - Truncates pixel's new value to match the range [0,255]
  */
 static void assign_sum_to_pixel(pixel *current_pixel, pixel_sum sum, int kernelScale) {
-
-    // divide by kernel's weight
-    sum.red /= kernelScale;
-    sum.green /= kernelScale;
-    sum.blue /= kernelScale;
+    if(kernelScale != 1) {  //often the scale is 1.
+        // divide by kernel's weight
+        sum.red /= kernelScale;
+        sum.green /= kernelScale;
+        sum.blue /= kernelScale;
+    }
 
     // truncate each pixel's color values to match the range [0,255]
-    current_pixel->red = (unsigned char) (min(max(sum.red, 0), 255));
-    current_pixel->green = (unsigned char) (min(max(sum.green, 0), 255));
-    current_pixel->blue = (unsigned char) (min(max(sum.blue, 0), 255));
+    // this func is called a lot we won't want she also calls funcs.
+    if (sum.red < 0){sum.red = 0;} else if(sum.red > 255) {sum.red = 255;}
+    current_pixel->red = (unsigned char) sum.red;
+    if (sum.green < 0){sum.green = 0;} else if(sum.green > 255) {sum.green = 255;}
+    current_pixel->green = (unsigned char) sum.green;
+    if (sum.blue < 0){sum.blue = 0;} else if(sum.blue > 255) {sum.blue = 255;}
+    current_pixel->blue = (unsigned char) sum.blue;
     return;
 }
 
@@ -72,12 +77,11 @@ static void sum_pixels_by_weight(pixel_sum *sum, pixel p, int weight) {
 static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int kernel[kernelSize][kernelSize], int kernelScale, bool filter) {
 
     int ii, jj;
-    int currRow, currCol;
     pixel_sum sum;
     pixel current_pixel;
     int min_intensity = 766; // arbitrary value that is higher than maximum possible intensity, which is 255*3=765
     int max_intensity = -1; // arbitrary value that is lower than minimum possible intensity, which is 0
-    int min_index, max_index;// more efficient
+    pixel min_p, max_p;// more efficient
     pixel loop_pixel;
 
 	// we check that this pixel is in the range of change (in the "red square as defined in ex5")
@@ -87,11 +91,15 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 		i >= endRange ||
 		j < halfKernelSize ||
 		j >= endRange){
-			return *src;
+			return *(src+ i*dim +j);
 	}
 	//so, we don't need min or max
 
-    initialize_pixel_sum(&sum);
+    // func for this little thing isn't effcient:
+    // initialize_pixel_sum(&sum);
+    sum.red = 0;
+	sum.green = 0;
+	sum.blue = 0;
 
 	//calculating lengths:
 	int length1 = i + halfKernelSize;
@@ -101,74 +109,95 @@ static pixel applyKernel(int dim, int i, int j, pixel *src, int kernelSize, int 
 	int* kIndex = (int *) kernel;
 	ii = i - halfKernelSize;
 	int indexPixel = ii * dim;
-
+    int startJJ = j - halfKernelSize;
 	//best to check here and calculate to filter in his loop for minimize the memory we read.
 	if(!filter){
 		for(; ii <= length1; ++ii) {
-			jj = j - halfKernelSize;
+			jj = startJJ;
+            int finalIndex = indexPixel + jj;
 			for(; jj <= length2; ++jj) {
 				// apply kernel on pixel at [ii,jj]
 
 				// Optimization don't use func in this loop instead (many things in stack):
-				pixel p = src[indexPixel + jj];
+				pixel p = src[finalIndex];
 				int weight = *(kIndex);
 				sum.red += ((int) p.red) * weight;
     			sum.green += ((int) p.green) * weight;
     			sum.blue += ((int) p.blue) * weight;
 
 				++kIndex;
+                ++finalIndex;
 			}
 			indexPixel += dim;
 		}
+	} else {
+        for(; ii <= length1; ++ii) {
+            jj = startJJ;
+            int finalIndex = indexPixel + jj;
+            for(; jj <= length2; ++jj) {
+                // check if smaller than min or higher than max and update
+                loop_pixel = src[finalIndex];
+                int r = (int) loop_pixel.red;
+                int g = (int) loop_pixel.green;
+                int b = (int) loop_pixel.blue;
+                // apply kernel on pixel at [ii,jj]
+                // Optimization don't use func in this loop instead (many things in stack):
+                int weight = *(kIndex);
+                sum.red += r * weight;
+                sum.green += g * weight;
+                sum.blue += b * weight;
+                
+                ++kIndex;
+                
+                //calculating once this arg:
+                int loop_pixel_intensity = r + b + g;
 
-		// assign kernel's result to pixel at [i,j]
-		assign_sum_to_pixel(&current_pixel, sum, kernelScale);
-		return current_pixel;
-	}
+                if (loop_pixel_intensity <= min_intensity) {
+                    min_intensity = loop_pixel_intensity;
 
-    for(; ii <= length1; ++ii) {
-		jj = j - halfKernelSize;
-        for(; jj <= length2; ++jj) {
-			// check if smaller than min or higher than max and update
-			int finalIndex = indexPixel + jj;
-            loop_pixel = src[finalIndex];
+                    //more efficient to remember the loc:
+                    min_p = loop_pixel;
+                }
 
-			// apply kernel on pixel at [ii,jj]
-			// Optimization don't use func in this loop instead (many things in stack):
-			pixel p = src[indexPixel + jj];
-			int weight = *(kIndex);
-			sum.red += ((int) p.red) * weight;
-    		sum.green += ((int) p.green) * weight;
-    		sum.blue += ((int) p.blue) * weight;
-			
-			++kIndex;
-			
-			//calculating once this arg:
-			int loop_pixel_intensity = ((int) loop_pixel.red) + ((int) loop_pixel.green) + ((int) loop_pixel.blue);
+                if (loop_pixel_intensity > max_intensity) {
+                    max_intensity = loop_pixel_intensity;
 
-            if (loop_pixel_intensity <= min_intensity) {
-                min_intensity = loop_pixel_intensity;
+                    //more efficient to remember the loc:
+                    max_p = loop_pixel;
+                }
 
-				//more efficient to remember the loc:
-                min_index = finalIndex;
+                ++finalIndex;
             }
+            indexPixel += dim;
+        }
 
-            if (loop_pixel_intensity > max_intensity) {
-                max_intensity = loop_pixel_intensity;
+        // filter out min and max
+        // func are not effecient:
+        // sum_pixels_by_weight(&sum, min_p, -1);
+        // sum_pixels_by_weight(&sum, max_p, -1);
+        sum.red -= min_p.red + max_p.red;
+        sum.green -= min_p.green + max_p.green;
+        sum.blue -= min_p.blue + max_p.blue;
+    }
 
-				//more efficient to remember the loc:
-                max_index = finalIndex;
-            }
-		}
-		indexPixel += dim;
-	}
+    // this func is called a lot so we won't use as func - heavy on stack
+	// assign_sum_to_pixel(&current_pixel, sum, kernelScale);
+    if(kernelScale != 1) {  //often the scale is 1.
+        // divide by kernel's weight
+        sum.red /= kernelScale;
+        sum.green /= kernelScale;
+        sum.blue /= kernelScale;
+    }
 
-    // filter out min and max
-    sum_pixels_by_weight(&sum, src[min_index], -1);
-    sum_pixels_by_weight(&sum, src[max_index], -1);
+    // truncate each pixel's color values to match the range [0,255]
+    // this func is called a lot we won't want she also calls funcs.
+    if (sum.red < 0){sum.red = 0;} else if(sum.red > 255) {sum.red = 255;}
+    current_pixel.red = (unsigned char) sum.red;
+    if (sum.green < 0){sum.green = 0;} else if(sum.green > 255) {sum.green = 255;}
+    current_pixel.green = (unsigned char) sum.green;
+    if (sum.blue < 0){sum.blue = 0;} else if(sum.blue > 255) {sum.blue = 255;}
+    current_pixel.blue = (unsigned char) sum.blue;
 
-    // assign kernel's result to pixel at [i,j]
-    assign_sum_to_pixel(&current_pixel, sum, kernelScale);
     return current_pixel;
 }
 
@@ -180,12 +209,157 @@ void smooth(int dim, pixel *src, pixel *dst, int kernelSize, int kernel[kernelSi
 
     int i, j;
 	//calculating index efficiently
-	int dstIndex = 0;
-    for (i = 0 ; i < dim; ++i) {
-        for (j =  0 ; j < dim; ++j) {
-            dst[dstIndex] = applyKernel(dim, i, j, src, kernelSize, kernel, kernelScale, filter);
-			++dstIndex;
+	int dstIndex = dim * dim - 1;
+    int start = dim - 1;
+    //go backwards is more efficient
+
+    //lets move out inner calculations
+    int ii, jj;
+    pixel_sum sum;
+    pixel current_pixel;
+    int min_intensity = 766; // arbitrary value that is higher than maximum possible intensity, which is 255*3=765
+    int max_intensity = -1; // arbitrary value that is lower than minimum possible intensity, which is 0
+    pixel min_p, max_p;// more efficient
+    pixel loop_pixel;
+
+    // we check that this pixel is in the range of change (in the "red square as defined in ex5")
+    int halfKernelSize = kernelSize >> 1; //=kernelSize/2
+    int endRange = dim - halfKernelSize;
+
+    //calculating lengths:
+    int startLength = start + halfKernelSize;
+    int length1 = startLength;
+    int startIIAndJJ = start - halfKernelSize;
+    int startII = startIIAndJJ;
+    int startStartIndexPixel = startIIAndJJ * (dim + 1);
+    for (i = start ; i >= 0; --i) {
+        int length2 = startLength;
+        int startJJ = startIIAndJJ;
+        int startIndexPixel = startStartIndexPixel;
+        for (j =  start ; j >= 0; --j) {
+            if( i < halfKernelSize ||
+                i >= endRange ||
+                j < halfKernelSize ||
+                j >= endRange){
+                    dst[dstIndex] = *(src+ i*dim +j);
+			        --dstIndex;
+                    --length2;
+                    --startJJ;
+                    --startIndexPixel;
+                    continue;
+            }
+            //so, we don't need min or max
+
+            // func for this little thing isn't effcient:
+            // initialize_pixel_sum(&sum);
+            sum.red = 0;
+            sum.green = 0;
+            sum.blue = 0;
+
+            //Optimize by calculate index efficiently in loop:
+            int* kIndex = (int *) kernel;
+            ii = startII;
+            int indexPixel = startIndexPixel;
+            //best to check here and calculate to filter in his loop for minimize the memory we read.
+            if(!filter){
+                for(; ii <= length1; ++ii) {
+                    jj = startJJ;
+                    int finalIndex = indexPixel;
+                    for(; jj <= length2; ++jj) {
+                        // apply kernel on pixel at [ii,jj]
+
+                        // Optimization don't use func in this loop instead (many things in stack):
+                        pixel p = src[finalIndex];
+                        int weight = *(kIndex);
+                        sum.red += ((int) p.red) * weight;
+                        sum.green += ((int) p.green) * weight;
+                        sum.blue += ((int) p.blue) * weight;
+
+                        ++kIndex;
+                        ++finalIndex;
+                    }
+                    indexPixel += dim;
+                }
+            } else {
+                for(; ii <= length1; ++ii) {
+                    jj = startJJ;
+                    int finalIndex = indexPixel;
+                    for(; jj <= length2; ++jj) {
+                        // check if smaller than min or higher than max and update
+                        loop_pixel = src[finalIndex];
+                        int r = (int) loop_pixel.red;
+                        int g = (int) loop_pixel.green;
+                        int b = (int) loop_pixel.blue;
+                        // apply kernel on pixel at [ii,jj]
+                        // Optimization don't use func in this loop instead (many things in stack):
+                        int weight = *(kIndex);
+                        sum.red += r * weight;
+                        sum.green += g * weight;
+                        sum.blue += b * weight;
+                        
+                        ++kIndex;
+                        
+                        //calculating once this arg:
+                        int loop_pixel_intensity = r + b + g;
+
+                        if (loop_pixel_intensity <= min_intensity) {
+                            min_intensity = loop_pixel_intensity;
+
+                            //more efficient to remember the loc:
+                            min_p = loop_pixel;
+                        }
+
+                        if (loop_pixel_intensity > max_intensity) {
+                            max_intensity = loop_pixel_intensity;
+
+                            //more efficient to remember the loc:
+                            max_p = loop_pixel;
+                        }
+
+                        ++finalIndex;
+                    }
+                    indexPixel += dim;
+                }
+
+                // filter out min and max
+                // func are not effecient:
+                // sum_pixels_by_weight(&sum, min_p, -1);
+                // sum_pixels_by_weight(&sum, max_p, -1);
+                sum.red -= min_p.red + max_p.red;
+                sum.green -= min_p.green + max_p.green;
+                sum.blue -= min_p.blue + max_p.blue;
+
+                min_intensity = 766; // arbitrary value that is higher than maximum possible intensity, which is 255*3=765
+                max_intensity = -1; // arbitrary value that is lower than minimum possible intensity, which is 0
+            }
+
+            // this func is called a lot so we won't use as func - heavy on stack
+            // assign_sum_to_pixel(&current_pixel, sum, kernelScale);
+            if(kernelScale != 1) {  //often the scale is 1.
+                // divide by kernel's weight
+                sum.red /= kernelScale;
+                sum.green /= kernelScale;
+                sum.blue /= kernelScale;
+            }
+
+            // truncate each pixel's color values to match the range [0,255]
+            // this func is called a lot we won't want she also calls funcs.
+            if (sum.red < 0){sum.red = 0;} else if(sum.red > 255) {sum.red = 255;}
+            current_pixel.red = (unsigned char) sum.red;
+            if (sum.green < 0){sum.green = 0;} else if(sum.green > 255) {sum.green = 255;}
+            current_pixel.green = (unsigned char) sum.green;
+            if (sum.blue < 0){sum.blue = 0;} else if(sum.blue > 255) {sum.blue = 255;}
+            current_pixel.blue = (unsigned char) sum.blue;
+
+            dst[dstIndex] = current_pixel;
+			--dstIndex;
+            --length2;
+            --startJJ;
+            --startIndexPixel;
         }
+        --length1;
+        --startII;
+        startStartIndexPixel -= dim;
     }
 }
 
@@ -256,7 +430,7 @@ void doConvolution(Image *image, int kernelSize, int kernel[kernelSize][kernelSi
 
     charsToPixels(image, backupOrg);
 
-	// Optimization: we make sure smooth go over all the pixels instead.
+	// Optimization: we make sure smooth go over all the pixels instead (we changed smooth):
     // copyPixels(pixelsImg, backupOrg);
 
     smooth(m, backupOrg, pixelsImg, kernelSize, kernel, kernelScale, filter);
