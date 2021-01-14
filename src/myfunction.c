@@ -545,8 +545,6 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
         // write result image to file
         writeBMP(image, srcImgpName, sharpRsltImgName); 
 
-        free(pixelsImg);
-        free(backupOrg);
     } else {
         pixel_sum* sum = getFilteredSumMatrix(m, backupOrg);
         // Optimization: we make sure smooth go over all the pixels instead (we changed smooth):
@@ -567,7 +565,8 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
         writeBMP(image, srcImgpName, filteredSharpRsltImgName); 
 
         free(sum);
-        free(pixelsImg);
-        free(backupOrg);
     }
+
+    free(pixelsImg);
+    free(backupOrg);
 }
