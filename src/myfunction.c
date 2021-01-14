@@ -12,20 +12,20 @@ typedef struct {
     // int num;
 } pixel_sum;
 
-/*
-* General Optimization we do:
-1) x++ -> ++x
-*/
-pixel_sum* getSumMatrix(int dim, pixel *src){
+void getBlurNoFilter(int dim, pixel *src, pixel *imagePixels, Image *charsImg, int kernelScale){
     int srcSize = dim*dim;
-    int sumSize = srcSize-(dim<<2)+4;
-    pixel_sum* sum = malloc(sumSize*sizeof(pixel_sum));
-    pixel * srcKernelIndex = src + sumSize + (dim<<1) -7;
+    int index = srcSize - 1;
+    int dimMult2 = dim<<1;
+    int sumSize = srcSize-(dimMult2<<1)+4;
+    int maxkernelScale = 255 * kernelScale;
+    int startIAndJ = dim - 2;
+    unsigned char* indexImage = charsImg->data + (srcSize<<1) + srcSize -dimMult2 -dim - 4;
+    pixel* srcKernelIndex = src + sumSize + dimMult2 -7;
     pixel* srcKernelIndexIterNext = srcKernelIndex + dim;
     pixel* srcKernelIndexIterNextNext = srcKernelIndexIterNext + dim;
-    pixel_sum* sumIndex = sum + sumSize -1;
-    int startIAndJ = dim - 3;
-    pixel* firstSrcIndex = src + srcSize -1 - (dim<<1);
+    pixel* srcIndex = src + index;
+    pixel* imagePixelsIndex = imagePixels + index;
+    pixel* firstSrcIndex = src + srcSize -1 - dimMult2;
     pixel* firstSrcIndexNext = firstSrcIndex + dim;
     pixel* firstSrcIndexNextNext = firstSrcIndexNext + dim;
     pixel* secondSrcIndex = firstSrcIndex - 1;
@@ -37,8 +37,24 @@ pixel_sum* getSumMatrix(int dim, pixel *src){
     pixel_sum* startColToFillIndex = colSum + 2;
     pixel_sum* endColToFillIndex = colSum + 3;
 
-    int i =  startIAndJ;
-    for(; i >= 0; --i){
+    int i = dim;
+    for(; i > 0; --i){
+        imagePixelsIndex->blue = srcIndex->blue;
+        imagePixelsIndex->green = srcIndex->green;
+        imagePixelsIndex->red = srcIndex->red;
+
+		--srcIndex;
+        --imagePixelsIndex;
+    }
+
+    i =  startIAndJ;
+    for(; i > 0; --i){
+        imagePixelsIndex->blue = srcIndex->blue;
+        imagePixelsIndex->green = srcIndex->green;
+        imagePixelsIndex->red = srcIndex->red;
+
+		--srcIndex;
+        --imagePixelsIndex;
         
         colSum->red = (int) firstSrcIndex->red;
         colSum->green = (int) firstSrcIndex->green;
@@ -73,7 +89,7 @@ pixel_sum* getSumMatrix(int dim, pixel *src){
         
         pixel_sum *colSumIndex = startColToFillIndex;
         int j = startIAndJ;
-        for(; j>=0 ; --j){
+        for(; j>0 ; --j){
 
             colSumIndex->red = (int) srcKernelIndex->red + (int) srcKernelIndexIterNext->red + (int) srcKernelIndexIterNextNext->red;
             colSumIndex->green = (int) srcKernelIndex->green + (int) srcKernelIndexIterNext->green + (int) srcKernelIndexIterNextNext->green;
@@ -82,23 +98,174 @@ pixel_sum* getSumMatrix(int dim, pixel *src){
             ++colSumIndex;
             if(colSumIndex == endColToFillIndex) {colSumIndex = colSum;}
 
-            sumIndex->red = colSum->red + colSumIterNext->red + colSumIterNextNext-> red;
-            sumIndex->green = colSum->green + colSumIterNext->green + colSumIterNextNext-> green;
-            sumIndex->blue = colSum->blue + colSumIterNext->blue + colSumIterNextNext-> blue;
+            pixel_sum sum = {colSum->red + colSumIterNext->red + colSumIterNextNext-> red,
+            colSum->green + colSumIterNext->green + colSumIterNextNext-> green,
+            colSum->blue + colSumIterNext->blue + colSumIterNextNext-> blue};
 
-            --sumIndex;
+            if (sum.blue < 0){
+                *indexImage = imagePixelsIndex->blue = 0;
+            } else if(sum.blue > maxkernelScale) {
+                *indexImage = imagePixelsIndex->blue = 255;
+            } else {
+                *indexImage = imagePixelsIndex->blue = (unsigned char) (sum.blue / kernelScale);
+            }
+
+            --indexImage;
+
+            if (sum.green < 0){
+                *indexImage = imagePixelsIndex->green = 0;
+            } else if(sum.green > maxkernelScale) {
+                *indexImage = imagePixelsIndex->green = 255;
+            } else {
+                *indexImage = imagePixelsIndex->green = (unsigned char) (sum.green / kernelScale);
+            }
+
+            --indexImage;
+
+            if (sum.red < 0){
+                *indexImage = imagePixelsIndex->red = 0;
+            } else if(sum.red > maxkernelScale) {
+                *indexImage = imagePixelsIndex->red = 255;
+            } else {
+                *indexImage = imagePixelsIndex->red = (unsigned char) (sum.red / kernelScale);
+            }
+
+            --indexImage;
+
+            --imagePixelsIndex;
+
             --srcKernelIndex;
             --srcKernelIndexIterNext;
             --srcKernelIndexIterNextNext;
         }
+        indexImage -= 6;
+        srcIndex -= startIAndJ;
+        srcKernelIndex -= 2;
+        srcKernelIndexIterNext -= 2;
+        srcKernelIndexIterNextNext -= 2;
+
+        imagePixelsIndex->blue = srcIndex->blue;
+        imagePixelsIndex->green = srcIndex->green;
+        imagePixelsIndex->red = srcIndex->red;
+
+		--srcIndex;
+        --imagePixelsIndex;
+    }
+
+    i = dim;
+    for(; i > 0; --i){
+        imagePixelsIndex->blue = srcIndex->blue;
+        imagePixelsIndex->green = srcIndex->green;
+        imagePixelsIndex->red = srcIndex->red;
+
+		--srcIndex;
+        --imagePixelsIndex;
+    }
+}
+
+void getSharppenNoFilter(int dim, pixel *src, Image *charsImg){
+    int srcSize = dim*dim;
+    int index = srcSize - 1;
+    int dimMult2 = dim<<1;
+    int sumSize = srcSize-(dimMult2<<1)+4;
+    int startIAndJ = dim - 2;
+    unsigned char* indexImage = charsImg->data + (srcSize<<1) + srcSize -dimMult2 -dim - 4;
+    pixel * srcKernelIndex = src + sumSize + dimMult2 -7;
+    pixel* srcKernelIndexIterNext = srcKernelIndex + dim;
+    pixel* srcKernelIndexIterNextNext = srcKernelIndexIterNext + dim;
+    pixel* srcIndex = src + index - dim - 1;
+    pixel* firstSrcIndex = src + srcSize -1 - dimMult2;
+    pixel* firstSrcIndexNext = firstSrcIndex + dim;
+    pixel* firstSrcIndexNextNext = firstSrcIndexNext + dim;
+    pixel* secondSrcIndex = firstSrcIndex - 1;
+    pixel* secondSrcIndexNext = firstSrcIndexNext -1;
+    pixel* secondSrcIndexNextNext = firstSrcIndexNextNext -1;
+    pixel_sum colSum[3];
+    pixel_sum* colSumIterNext = colSum + 1;
+    pixel_sum* colSumIterNextNext = colSumIterNext + 1;
+    pixel_sum* startColToFillIndex = colSum + 2;
+    pixel_sum* endColToFillIndex = colSum + 3;
+
+    int i =  startIAndJ;
+    for(; i > 0; --i){
+    
+        colSum->red = (int) firstSrcIndex->red;
+        colSum->green = (int) firstSrcIndex->green;
+        colSum->blue = (int) firstSrcIndex->blue;
+
+        colSum->red += (int) firstSrcIndexNext->red;
+        colSum->green += (int) firstSrcIndexNext->green;
+        colSum->blue += (int) firstSrcIndexNext->blue;
+
+        colSum->red += (int) firstSrcIndexNextNext->red;
+        colSum->green += (int) firstSrcIndexNextNext->green;
+        colSum->blue += (int) firstSrcIndexNextNext->blue;
+
+        colSumIterNext->red = (int) secondSrcIndex->red;
+        colSumIterNext->green = (int) secondSrcIndex->green;
+        colSumIterNext->blue = (int) secondSrcIndex->blue;
+
+        colSumIterNext->red += (int) secondSrcIndexNext->red;
+        colSumIterNext->green += (int) secondSrcIndexNext->green;
+        colSumIterNext->blue += (int) secondSrcIndexNext->blue;
+
+        colSumIterNext->red += (int) secondSrcIndexNextNext->red;
+        colSumIterNext->green += (int) secondSrcIndexNextNext->green;
+        colSumIterNext->blue += (int) secondSrcIndexNextNext->blue;
+
+        firstSrcIndex -= dim;
+        firstSrcIndexNext -= dim;
+        firstSrcIndexNextNext -= dim;
+        secondSrcIndex = firstSrcIndex - 1;
+        secondSrcIndexNext = firstSrcIndexNext - 1;
+        secondSrcIndexNextNext = firstSrcIndexNextNext - 1;
+        
+        pixel_sum *colSumIndex = startColToFillIndex;
+        int j = startIAndJ;
+        for(; j>0 ; --j){
+
+            colSumIndex->red = (int) srcKernelIndex->red + (int) srcKernelIndexIterNext->red + (int) srcKernelIndexIterNextNext->red;
+            colSumIndex->green = (int) srcKernelIndex->green + (int) srcKernelIndexIterNext->green + (int) srcKernelIndexIterNextNext->green;
+            colSumIndex->blue = (int) srcKernelIndex->blue + (int) srcKernelIndexIterNext->blue + (int) srcKernelIndexIterNextNext->blue;
+
+            ++colSumIndex;
+            if(colSumIndex == endColToFillIndex) {colSumIndex = colSum;}
+
+            pixel_sum sum = {colSum->red + colSumIterNext->red + colSumIterNextNext-> red,
+            colSum->green + colSumIterNext->green + colSumIterNextNext-> green,
+            colSum->blue + colSumIterNext->blue + colSumIterNextNext-> blue};
+
+            int r = srcIndex->red;
+            int b = srcIndex->blue;
+            int g = srcIndex->green;
+
+            sum.red = (r<<3) + (r<<1) - sum.red;
+            sum.green = (g<<3) + (g<<1) - sum.green;
+            sum.blue = (b<<3) + (b<<1) - sum.blue;
+
+            if (sum.blue < 0){sum.blue = 0;} else if(sum.blue > 255) {sum.blue = 255;}
+            *indexImage = (unsigned char) sum.blue;
+            --indexImage;
+            if (sum.green < 0){sum.green = 0;} else if(sum.green > 255) {sum.green = 255;}
+            *indexImage = (unsigned char) sum.green;
+            --indexImage;
+            if (sum.red < 0){sum.red = 0;} else if(sum.red > 255) {sum.red = 255;}
+            *indexImage = (unsigned char) sum.red;
+            --indexImage;
+
+            --srcIndex;
+
+            --srcKernelIndex;
+            --srcKernelIndexIterNext;
+            --srcKernelIndexIterNextNext;
+        }
+        indexImage -= 6;
+        srcIndex -= 2;
         srcKernelIndex -= 2;
         srcKernelIndexIterNext -= 2;
         srcKernelIndexIterNextNext -= 2;
     }
-
-    return sum;
 }
-
 
 pixel_sum* getFilteredSumMatrix(int dim, pixel *src){
     pixel_sum* sum = malloc((dim-2)*(dim-2)*sizeof(pixel_sum));
@@ -253,7 +420,7 @@ void blur(int dim, pixel *src, pixel *dst, pixel_sum* sumMat, int kernelScale) {
 
     pixel_sum sum;
     pixel current_pixel;
-    pixel_sum* sumMatIndex = sumMat + index - (dim<<2) +4;
+    pixel_sum* sumMatIndex = sumMat + index - (dim<<2) + 4;
     int maxkernelScale = 255 * kernelScale;
     for(i = start; i > 0; --i){
         *dstIndex = *srcIndex;
@@ -316,75 +483,6 @@ void blur(int dim, pixel *src, pixel *dst, pixel_sum* sumMat, int kernelScale) {
     }
 }
 
-
-
-void sharppen(int dim, pixel *src, pixel *dst, pixel_sum* sumMat) {
-    int index = dim * dim - 1;
-    pixel* srcIndex = src+index;
-    pixel* dstIndex = dst+index;
-    int i = dim;
-    int start = dim - 2;
-
-    for(; i > 0; --i){
-        *dstIndex = *srcIndex;
-        --srcIndex;
-        --dstIndex;
-    }
-
-    pixel_sum sum;
-    pixel current_pixel;
-    pixel_sum* sumMatIndex = sumMat + start*start -1;
-    for(i = start; i > 0; --i){
-        *dstIndex = *srcIndex;
-        --srcIndex;
-        --dstIndex;
-
-        int j = start;
-        for(; j > 0; --j) {
-        sum = *sumMatIndex;
-        // this func is called a lot so we won't use as func - heavy on stack
-        // assign_sum_to_pixel(&current_pixel, sum, kernelScale);
-        int r = srcIndex->red;
-        int b = srcIndex->blue;
-        int g = srcIndex->green;
-
-        sum.red = (r<<3) + (r<<1) - sum.red;
-        sum.green = (g<<3) + (g<<1) - sum.green;
-        sum.blue = (b<<3) + (b<<1) - sum.blue;
-
-        // sum.red = srcIndex->red * 10 - sum.red;
-        // sum.green = srcIndex->green * 10 - sum.green;
-        // sum.blue = srcIndex->blue *10 - sum.blue;
-
-        // truncate each pixel's color values to match the range [0,255]
-        // this func is called a lot we won't want she also calls funcs.
-        if (sum.red < 0){sum.red = 0;} else if(sum.red > 255) {sum.red = 255;}
-        current_pixel.red = (unsigned char) sum.red;
-        if (sum.green < 0){sum.green = 0;} else if(sum.green > 255) {sum.green = 255;}
-        current_pixel.green = (unsigned char) sum.green;
-        if (sum.blue < 0){sum.blue = 0;} else if(sum.blue > 255) {sum.blue = 255;}
-        current_pixel.blue = (unsigned char) sum.blue;
-
-        *dstIndex = current_pixel;
-
-        --sumMatIndex;
-        --srcIndex;
-        --dstIndex;
-        }
-
-        *dstIndex = *srcIndex;
-        --srcIndex;
-        --dstIndex;
-    }
-
-    for(i = dim; i > 0; --i){
-         *dstIndex = *srcIndex;
-        --srcIndex;
-        --dstIndex;
-    }
-
-}
-
 void charsToPixels(Image *charsImg, pixel* pixels) {
 //calculating index efficiently
 	unsigned char* indexImage = charsImg->data;
@@ -436,27 +534,17 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
     //caculating length once:
     charsToPixels(image, backupOrg);
     if (flag == '1') {  
-        pixel_sum* sum = getSumMatrix(m, backupOrg);
-        // Optimization: we make sure smooth go over all the pixels instead (we changed smooth):
-        // copyPixels(pixelsImg, backupOrg);
-        blur(m, backupOrg, pixelsImg, sum, 9);
-
-        pixelsToChars(pixelsImg, image);
+        getBlurNoFilter(m, backupOrg, pixelsImg, image, 9);
 
         // write result image to file
         writeBMP(image, srcImgpName, blurRsltImgName);
 
-        sum = getSumMatrix(m, pixelsImg);
-
         // sharpen the resulting image
-        sharppen(m, pixelsImg, backupOrg, sum);
-        
-        pixelsToChars(backupOrg, image);
+        getSharppenNoFilter(m, pixelsImg, image);
         
         // write result image to file
         writeBMP(image, srcImgpName, sharpRsltImgName); 
 
-        free(sum);
         free(pixelsImg);
         free(backupOrg);
     } else {
@@ -470,12 +558,10 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
         // write result image to file
         writeBMP(image, srcImgpName, filteredBlurRsltImgName);
 
-        sum = getSumMatrix(m, pixelsImg);
+        charsToPixels(image, pixelsImg);
 
         // sharpen the resulting image
-        sharppen(m, pixelsImg, backupOrg, sum);
-        
-        pixelsToChars(backupOrg, image);
+        getSharppenNoFilter(m, pixelsImg, image);
 
         // write result image to file
         writeBMP(image, srcImgpName, filteredSharpRsltImgName); 
