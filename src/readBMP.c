@@ -116,7 +116,6 @@ int ImageLoad(char *filename, Image *image) {
 		printf("Error allocating memory for color-corrected image data");
 		return 0;
 	}
-
 	if ((i = fread(image->data, size, 1, file)) != 1) {
 		printf("Error reading image data from %s.\n", filename);
 		return 0;

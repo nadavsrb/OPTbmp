@@ -18,18 +18,6 @@ make
 # cmp Filtered_Blur.bmp 1x1/Filtered_Blur.bmp
 # cmp Filtered_Sharpen.bmp 1x1/Filtered_Sharpen.bmp
 # echo "*************************end cmp 1x1.bmp*************************"
-# echo "*************************./showBMP 2x2.bmp *************************"
-# ./showBMP 2x2.bmp
-# echo "*************************./showBMP 2x2.bmp 1 *************************"
-# ./showBMP 2x2.bmp 1
-# echo "*************************./showBMP 2x2.bmp 2 *************************"
-# ./showBMP 2x2.bmp 2
-# echo "*************************cmp 2x2.bmp*************************"
-# cmp Blur.bmp 2x2/Blur.bmp
-# cmp Sharpen.bmp 2x2/Sharpen.bmp
-# cmp Filtered_Blur.bmp 2x2/Filtered_Blur.bmp
-# cmp Filtered_Sharpen.bmp 2x2/Filtered_Sharpen.bmp
-# echo "*************************end cmp 2x2.bmp*************************"
 echo "*************************./showBMP gibson_500.bmp *************************"
 ./showBMP gibson_500.bmp
 gprof showBMP gmon.out > report0.txt

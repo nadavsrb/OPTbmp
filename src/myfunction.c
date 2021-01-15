@@ -649,6 +649,25 @@ void charsToPixels(Image *charsImg, pixel* pixels, pixel* frame) {
 }
 
 void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sharpRsltImgName, char* filteredBlurRsltImgName, char* filteredSharpRsltImgName, char flag) {
+    if (m < 3) {
+        if (flag == '1') {
+
+        // write result image to file
+        writeBMP(image, srcImgpName, blurRsltImgName);
+        
+        // write result image to file
+        writeBMP(image, srcImgpName, sharpRsltImgName);
+        return;
+        }
+
+        // write result image to file
+        writeBMP(image, srcImgpName, filteredBlurRsltImgName);
+
+        // write result image to file
+        writeBMP(image, srcImgpName, filteredSharpRsltImgName);
+        return;
+    }
+
     size_t size = m*n*sizeof(pixel);
     pixel* pixelsImg = malloc(size);
     pixel* backupOrg = malloc(size);
@@ -667,20 +686,19 @@ void myfunction(Image *image, char* srcImgpName, char* blurRsltImgName, char* sh
         // write result image to file
         writeBMP(image, srcImgpName, sharpRsltImgName); 
 
-    } else {
-
-        getBlurWithFilter(m, backupOrg, pixelsImg, image, 7);
-
-        // write result image to file
-        writeBMP(image, srcImgpName, filteredBlurRsltImgName);
-
-        // sharpen the resulting image
-        getSharppenNoFilter(m, pixelsImg, image);
-
-        // write result image to file
-        writeBMP(image, srcImgpName, filteredSharpRsltImgName); 
-
+        return;
     }
+
+    getBlurWithFilter(m, backupOrg, pixelsImg, image, 7);
+
+    // write result image to file
+    writeBMP(image, srcImgpName, filteredBlurRsltImgName);
+
+    // sharpen the resulting image
+    getSharppenNoFilter(m, pixelsImg, image);
+
+    // write result image to file
+    writeBMP(image, srcImgpName, filteredSharpRsltImgName); 
 
     free(pixelsImg);
     free(backupOrg);

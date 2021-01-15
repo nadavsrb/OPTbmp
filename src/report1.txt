@@ -3,7 +3,7 @@ Flat profile:
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
  time   seconds   seconds    calls  ms/call  ms/call  name    
-100.08      0.01     0.01        1    10.01    10.01  getSharppenNoFilter
+100.09      0.01     0.01        1    10.01    10.01  getSharppenNoFilter
   0.00      0.01     0.00        1     0.00     0.00  charsToPixels
   0.00      0.01     0.00        1     0.00     0.00  getBlurNoFilter
   0.00      0.01     0.00        1     0.00     0.00  getImage
@@ -46,7 +46,7 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 2 byte(s) for 99.92% of 0.01 seconds
+granularity: each sample hit covers 2 byte(s) for 99.91% of 0.01 seconds
 
 index % time    self  children    called     name
                 0.01    0.00       1/1           myfunction [2]
