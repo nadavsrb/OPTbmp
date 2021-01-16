@@ -2,13 +2,12 @@ Flat profile:
 
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
- time   seconds   seconds    calls  ms/call  ms/call  name    
-100.09      0.01     0.01        1    10.01    10.01  getSharppenNoFilter
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+100.06      0.01     0.01                             writeBMP
   0.00      0.01     0.00        1     0.00     0.00  charsToPixels
   0.00      0.01     0.00        1     0.00     0.00  getBlurWithFilter
-  0.00      0.01     0.00        1     0.00     0.00  getImage
-  0.00      0.01     0.00        1     0.00    10.01  myfunction
-  0.00      0.01     0.00        1     0.00    10.01  optimize
+  0.00      0.01     0.00        1     0.00     0.00  getSharppenNoFilter
+  0.00      0.01     0.00        1     0.00     0.00  myfunction
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -46,35 +45,26 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 2 byte(s) for 99.91% of 0.01 seconds
+granularity: each sample hit covers 2 byte(s) for 99.94% of 0.01 seconds
 
 index % time    self  children    called     name
-                0.01    0.00       1/1           myfunction [2]
-[1]    100.0    0.01    0.00       1         getSharppenNoFilter [1]
------------------------------------------------
-                0.00    0.01       1/1           optimize [3]
-[2]    100.0    0.00    0.01       1         myfunction [2]
-                0.01    0.00       1/1           getSharppenNoFilter [1]
-                0.00    0.00       1/1           charsToPixels [5]
-                0.00    0.00       1/1           getBlurWithFilter [6]
------------------------------------------------
-                0.00    0.01       1/1           main [4]
-[3]    100.0    0.00    0.01       1         optimize [3]
-                0.00    0.01       1/1           myfunction [2]
------------------------------------------------
                                                  <spontaneous>
-[4]    100.0    0.00    0.01                 main [4]
-                0.00    0.01       1/1           optimize [3]
-                0.00    0.00       1/1           getImage [7]
+[1]    100.0    0.01    0.00                 writeBMP [1]
 -----------------------------------------------
-                0.00    0.00       1/1           myfunction [2]
-[5]      0.0    0.00    0.00       1         charsToPixels [5]
+                0.00    0.00       1/1           myfunction [5]
+[2]      0.0    0.00    0.00       1         charsToPixels [2]
 -----------------------------------------------
-                0.00    0.00       1/1           myfunction [2]
-[6]      0.0    0.00    0.00       1         getBlurWithFilter [6]
+                0.00    0.00       1/1           myfunction [5]
+[3]      0.0    0.00    0.00       1         getBlurWithFilter [3]
 -----------------------------------------------
-                0.00    0.00       1/1           main [4]
-[7]      0.0    0.00    0.00       1         getImage [7]
+                0.00    0.00       1/1           myfunction [5]
+[4]      0.0    0.00    0.00       1         getSharppenNoFilter [4]
+-----------------------------------------------
+                0.00    0.00       1/1           optimize [20]
+[5]      0.0    0.00    0.00       1         myfunction [5]
+                0.00    0.00       1/1           charsToPixels [2]
+                0.00    0.00       1/1           getBlurWithFilter [3]
+                0.00    0.00       1/1           getSharppenNoFilter [4]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -167,5 +157,5 @@ notice and this notice are preserved.
 
 Index by function name
 
-   [5] charsToPixels           [7] getImage                [2] myfunction
-   [6] getBlurWithFilter       [1] getSharppenNoFilter     [3] optimize
+   [2] charsToPixels           [4] getSharppenNoFilter     [1] writeBMP
+   [3] getBlurWithFilter       [5] myfunction
