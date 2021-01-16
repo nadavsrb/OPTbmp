@@ -773,11 +773,11 @@ void getBlurWithFilter(int dim, pixel *src, pixel *imagePixels, Image *charsImg,
         ++maxRawIndex;
         ++maxPixelsIndex;
         
-        firstSrcIndexNext = firstSrcIndex;
         firstSrcIndexNextNext = firstSrcIndexNext;
+        firstSrcIndexNext = firstSrcIndex; 
         firstSrcIndex -= dim;
-        secondSrcIndexNext = secondSrcIndex;
         secondSrcIndexNextNext = secondSrcIndexNext;
+        secondSrcIndexNext = secondSrcIndex;
         secondSrcIndex = firstSrcIndex - 1;
         
         pixel_sum *colSumIndex = startColToFillIndex;

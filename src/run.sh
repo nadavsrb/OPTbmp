@@ -6,18 +6,32 @@ rm report0.txt
 rm report1.txt
 rm report2.txt
 make
-# echo "*************************./showBMP 1x1.bmp *************************"
-# ./showBMP 1x1.bmp
-# echo "*************************./showBMP 1x1.bmp 1 *************************"
-# ./showBMP 1x1.bmp 1
-# echo "*************************./showBMP 1x1.bmp 2 *************************"
-# ./showBMP 1x1.bmp 2
-# echo "*************************cmp 1x1.bmp*************************"
-# cmp Blur.bmp 1x1/Blur.bmp
-# cmp Sharpen.bmp 1x1/Sharpen.bmp
-# cmp Filtered_Blur.bmp 1x1/Filtered_Blur.bmp
-# cmp Filtered_Sharpen.bmp 1x1/Filtered_Sharpen.bmp
-# echo "*************************end cmp 1x1.bmp*************************"
+echo "*************************./showBMP 1x1.bmp *************************"
+./showBMP 1x1.bmp
+echo "*************************./showBMP 1x1.bmp 1 *************************"
+./showBMP 1x1.bmp 1
+echo "*************************./showBMP 1x1.bmp 2 *************************"
+./showBMP 1x1.bmp 2
+echo "*************************cmp 1x1.bmp*************************"
+cmp Blur.bmp 1x1/Blur.bmp
+cmp Sharpen.bmp 1x1/Sharpen.bmp
+cmp Filtered_Blur.bmp 1x1/Filtered_Blur.bmp
+cmp Filtered_Sharpen.bmp 1x1/Filtered_Sharpen.bmp
+echo "*************************end cmp 1x1.bmp*************************"
+# echo "*************************./showBMP wild.bmp *************************"
+# ./showBMP wild.bmp
+# echo "*************************./showBMP wild.bmp 1 *************************"
+# ./showBMP wild.bmp 1
+# echo "*************************./showBMP wild.bmp 2 *************************"
+# ./showBMP wild.bmp 2
+
+# # ./showBMP wild.bmp  wild/Filtered_Blur.bmp Filtered_Blur.bmp
+# echo "*************************cmp wild.bmp*************************"
+# cmp Blur.bmp wild/Blur.bmp
+# cmp Sharpen.bmp wild/Sharpen.bmp
+# cmp Filtered_Blur.bmp wild/Filtered_Blur.bmp
+# cmp Filtered_Sharpen.bmp wild/Filtered_Sharpen.bmp
+# echo "*************************end cmp wild.bmp*************************"
 echo "*************************./showBMP gibson_500.bmp *************************"
 ./showBMP gibson_500.bmp
 gprof showBMP gmon.out > report0.txt

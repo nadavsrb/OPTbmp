@@ -97,6 +97,41 @@ static void key(unsigned char c, int x, int y) {
 }
 
 int main(int argc, char **argv) {
+	// getImage(argv[1]);
+	// n = image->sizeX; // width
+	// m = image->sizeY; // height
+	// Image* image0 = image;
+	// getImage(argv[2]);
+	// n = image->sizeX; // width
+	// m = image->sizeY; // height
+	// Image* image1 = image;
+	// getImage(argv[3]);
+	// n = image->sizeX; // width
+	// m = image->sizeY; // height
+	// Image* image2 = image;
+
+	// for (int i = 0; i < m*m*3; i += 3) {
+	// 	if(image1->data[i] != image2->data[i] ||
+	// 	image1->data[i + 1] != image2->data[i + 1] ||
+	// 	image1->data[i + 2] != image2->data[i + 2]){
+	// 		printf("pixel: %d\n", i/3);
+
+	// 		int index = i - m * 3 -3;
+	// 		for (int j = 0; j < 3; ++j){
+	// 			int s = index;
+	// 			for (int k = 0; k < 3; ++k){
+	// 				printf("%d,%d,%d|", (int) image0->data[s], (int) image0->data[s +1], (int) image0->data[s +2]);
+	// 				s += 3;
+	// 			}
+	// 			index += m*3;
+	// 			printf("\n");
+	// 		}
+	// 		printf("expected: %d,%d,%d\n", (int) image1->data[i], (int) image1->data[i +1], (int) image1->data[i +2]);
+	// 		printf("got: %d,%d,%d\n", (int) image2->data[i], (int) image2->data[i +1], (int) image2->data[i +2]);
+
+	// 		break;
+	// 	}
+	// }
 
 	getImage(argv[1]);
 	n = image->sizeX; // width
